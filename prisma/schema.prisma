@@ -1,0 +1,332 @@
+generator client {
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  previewFeatures = ["fullTextSearch", "fulltextIndex"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserType {
+  ADMIN
+  CUSTOMER
+  MERCHANT
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum IdentificationMeans {
+  NIN
+  VOTERS_CARD
+  INTERNATIONAL_PASSPORT
+}
+
+enum KYC_STATUS {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+enum WalletSetupStatus {
+  PENDING
+  ACTIVE
+}
+
+enum PermissionGroup {
+  USERS
+  PROVIDER
+  TRANSACTION
+}
+
+enum TransactionType {
+  AIRTIME_TO_CASH
+  DATA_PURCHASE
+  TRANSFER_FUND
+  WALLET_FUND
+  ELECTRICITY_BILL
+  INTERNET_BILL
+  CABLETV_BILL
+  AIRTIME_PURCHASE
+  PAYOUT
+}
+
+enum TransactionFlow {
+  IN
+  OUT
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  APPROVED
+  FAILED
+  DECLINED
+}
+
+enum PaymentChannel {
+  WALLET
+  SAFEHAVEN_VIRTUAL_ACCOUNT_TRANSFER
+  SYSTEM
+  MANUAL
+}
+
+enum WalletFundTransactionFlow {
+  BENEFACTOR_TO_BENEFICIARY
+  SELF_FUND
+  FROM_PAID_COMMISSION
+  COMMISSION_BALANCE_TO_MAIN_BALANCE
+  FROM_FAILED_TRANSACTION
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+// Models
+model User {
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  identifier        String             @unique
+  firstName         String
+  lastName          String
+  username          String?
+  middleName        String?
+  email             String             @unique
+  phone             String?
+  password          String
+  userType          UserType
+  photo             String?
+  gender            Gender?
+  dateOfBirth       DateTime?
+  referralCode      String
+  status            Status             @default(ACTIVE)
+  transactionPin    String?
+  ipAddress         String?
+  notificationToken String?
+  isVerified        Boolean            @default(true)
+  kycStatus         KYC_STATUS?
+  isWalletCreated   Boolean            @default(false)
+  isDeleted         Boolean?           @default(false)
+  walletSetupStatus WalletSetupStatus?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  lastLogin         DateTime?
+  loginCount        Int                @default(0)
+
+  roles                UserRole[]
+  wallet               Wallet?
+  passwordResetRequest PasswordResetRequest?
+  kycInformation       KycInformation?
+  address              Address?
+  virtualBankAccount   VirtualBankAccount[]
+
+  transactions         Transaction[] @relation(name: "userToTransaction")
+  sentTransactions     Transaction[] @relation(name: "senderToTransaction")
+  receivedTransactions Transaction[] @relation(name: "receiverToTransaction")
+
+  @@fulltext([firstName, lastName])
+  @@map("Users")
+}
+
+model Address {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique @db.ObjectId
+  homeAddress String?
+  streetName  String?
+  city        String
+  postalCode  String
+  state       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("Addresses")
+}
+
+model KycInformation {
+  id                             String               @id @default(auto()) @map("_id") @db.ObjectId
+  userId                         String               @unique @db.ObjectId
+  identificationMeans            IdentificationMeans?
+  identificationMeansDocumentUrl String?
+  createdAt                      DateTime             @default(now())
+  updatedAt                      DateTime             @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("KycInformation")
+}
+
+model AccountVerificationRequest {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  email      String   @unique
+  code       String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isVerified Boolean  @default(false)
+
+  @@map("AccountVerificationRequests")
+}
+
+model Role {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isAdmin     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@map("Roles")
+}
+
+model UserRole {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  roleId     String   @db.ObjectId
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+  @@map("UserRoles")
+}
+
+model Permission {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  group       PermissionGroup
+  name        String          @unique
+  description String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  roles RolePermission[]
+
+  @@map("Permissions")
+}
+
+model RolePermission {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  roleId       String   @db.ObjectId
+  permissionId String   @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("RolePermissions")
+}
+
+model PasswordResetRequest {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("PasswordResetRequests")
+}
+
+//Virtual Bank Account
+enum VirtualAccountProvider {
+  SAFEHAVEN
+}
+
+model VirtualBankAccount {
+  id            String                 @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String                 @db.ObjectId
+  bankName      String
+  accountName   String
+  accountNumber String
+  reference     String?
+  provider      VirtualAccountProvider
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([accountNumber, provider])
+  @@map("VirtualBankAccounts")
+}
+
+model Wallet {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String   @unique @db.ObjectId
+  walletNumber     String   @unique
+  availableBalance Float    @default(0)
+  bookBalance      Float    @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("Wallets")
+}
+
+model Transaction {
+  id                           String                     @id @default(auto()) @map("_id") @db.ObjectId
+  type                         TransactionType
+  flow                         TransactionFlow
+  amount                       Float
+  serviceCharge                Float                      @default(0)
+  totalAmount                  Float //serviceCharge + amount
+  status                       TransactionStatus
+  paymentStatus                PaymentStatus?
+  paymentReference             String?                    @unique //reference for payment
+  userId                       String                     @db.ObjectId
+  senderId                     String?                    @db.ObjectId
+  receiverId                   String?                    @db.ObjectId
+  destinationBankName          String?
+  destinationBankAccountNumber String?
+  destinationBankAccountName   String?
+  shortDescription             String?
+  description                  String?
+  transactionId                String                     @unique
+  provider                     String?
+  providerLogo                 String?
+  accountId                    String?
+  packageType                  String?
+  meterType                    String?
+  senderIdentifier             String?
+  receiverIdentifier           String?
+  paymentChannel               PaymentChannel?
+  token                        String?
+  units                        String?
+  commission                   Float?                     @default(0)
+  companyCommission            Float?                     @default(0)
+  serviceTransactionCode       String?
+  serviceTransactionCode2      String?
+  transId                      Int?
+  walletFundTransactionFlow    WalletFundTransactionFlow?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(name: "userToTransaction", fields: [userId], references: [id])
+  sender    User?    @relation(name: "senderToTransaction", fields: [senderId], references: [id])
+  receiver  User?    @relation(name: "receiverToTransaction", fields: [receiverId], references: [id])
+
+  @@index([paymentReference, paymentStatus])
+  @@index([type])
+  @@fulltext([paymentReference, senderIdentifier, transactionId])
+  @@map("Transactions")
+}
