@@ -1,6 +1,7 @@
 import { WalletService } from "@/modules/api/banking/wallet/services";
 import { SafehavenWebhookEvent } from "../events";
 import * as t from "../types";
+import { VirtualAccountProvider } from "@prisma/client";
 import { Inject } from "@nestjs/common";
 import { BankingInjectionToken } from "@/modules/factory/banking/types";
 import { SafehavenService } from "@/modules/factory/banking/providers/safehaven/services";
@@ -38,5 +39,14 @@ export class SafehavenWebhookService {
             responseCode: "00",
             statusCode: 200,
         };
+    }
+    async processSubAccountDeposit(options: t.SubAccountDeposit) {
+        await this.walletService.walletBankDeposit({
+            accountNumber: options.creditAccountNumber,
+            amount: options.amount,
+            provider: VirtualAccountProvider.SAFEHAVEN,
+            reference: options.sessionId,
+            narration: options.narration,
+        });
     }
 }
