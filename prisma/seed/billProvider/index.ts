@@ -2,8 +2,8 @@ import { Prisma } from "@prisma/client";
 
 export const billProviders: Prisma.BillProviderUncheckedCreateInput[] = [
     {
-        name: "BuyPower",
+        name: "Shago",
         isActive: true,
-        slug: "buypower",
+        slug: "shago",
     },
 ];

@@ -310,6 +310,8 @@ model Transaction {
   senderIdentifier             String?
   receiverIdentifier           String?
   paymentChannel               PaymentChannel?
+  billPaymentReference         String?
+  billPaymentReceiptNO         String?
   token                        String?
   units                        String?
   commission                   Float?                     @default(0)
@@ -318,15 +320,119 @@ model Transaction {
   serviceTransactionCode2      String?
   transId                      Int?
   walletFundTransactionFlow    WalletFundTransactionFlow?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(name: "userToTransaction", fields: [userId], references: [id])
-  sender    User?    @relation(name: "senderToTransaction", fields: [senderId], references: [id])
-  receiver  User?    @relation(name: "receiverToTransaction", fields: [receiverId], references: [id])
+  billServiceSlug              String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  user           User          @relation(name: "userToTransaction", fields: [userId], references: [id])
+  sender         User?         @relation(name: "senderToTransaction", fields: [senderId], references: [id])
+  receiver       User?         @relation(name: "receiverToTransaction", fields: [receiverId], references: [id])
+  BillProvider   BillProvider? @relation(fields: [billProviderId], references: [id])
+  billProviderId String?       @db.ObjectId
+  BillService    BillService?  @relation(fields: [billServiceId], references: [id])
+  billServiceId  String?       @db.ObjectId
 
   @@index([paymentReference, paymentStatus])
   @@index([type])
   @@fulltext([paymentReference, senderIdentifier, transactionId])
   @@map("Transactions")
+}
+
+model BillProvider {
+  id            String                          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  slug          String                          @unique
+  isActive      Boolean?                        @default(true)
+  isDefault     Boolean?                        @default(false)
+  walletBalance Float?
+  createdAt     DateTime                        @default(now())
+  updatedAt     DateTime                        @updatedAt
+  transactions  Transaction[]
+  discos        BillProviderElectricDisco[]
+  airtimes      BillProviderDataBundleNetwork[]
+  dataBundles   BillProviderAirtimeNetwork[]
+  cableTVs      BillProviderCableTVNetwork[]
+
+  @@map("BillProviders")
+}
+
+enum BillType {
+  DATA
+  ELECTRICITY
+  AIRTIME
+  CABLE_TV
+  INTERNET
+  AIRLINE
+}
+
+model BillService {
+  id                    String                          @id @default(auto()) @map("_id") @db.ObjectId
+  name                  String
+  slug                  String                          @unique
+  type                  BillType
+  abbrev                String?
+  icon                  String
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
+  electricBillProviders BillProviderElectricDisco[]
+  transactions          Transaction[]
+  dataBundleProviders   BillProviderDataBundleNetwork[]
+  airtimeProviders      BillProviderAirtimeNetwork[]
+  cableTVProviders      BillProviderCableTVNetwork[]
+
+  @@map("BillServices")
+}
+
+model BillProviderElectricDisco {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  billProviderSlug  String
+  billServiceSlug   String
+  discoIdentifier   String?
+  prepaidMeterCode  String
+  postpaidMeterCode String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  billProvider      BillProvider @relation(fields: [billProviderSlug], references: [slug])
+  discoProvider     BillService  @relation(fields: [billServiceSlug], references: [slug])
+
+  @@unique([billServiceSlug, billProviderSlug])
+  @@map("BillProviderElectricDiscos")
+}
+
+model BillProviderDataBundleNetwork {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  billProviderSlug String
+  billServiceSlug  String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  billProvider     BillProvider @relation(fields: [billProviderSlug], references: [slug])
+  dataProvider     BillService  @relation(fields: [billServiceSlug], references: [slug])
+
+  @@unique([billServiceSlug, billProviderSlug])
+  @@map("BillProviderDataBundleNetworks")
+}
+
+model BillProviderAirtimeNetwork {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  billProviderSlug String
+  billServiceSlug  String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  billProvider     BillProvider @relation(fields: [billProviderSlug], references: [slug])
+  airtimeProvider  BillService  @relation(fields: [billServiceSlug], references: [slug])
+
+  @@unique([billServiceSlug, billProviderSlug])
+  @@map("BillProviderAirtimeNetworks")
+}
+
+model BillProviderCableTVNetwork {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  billProviderSlug String
+  billServiceSlug  String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  billProvider     BillProvider @relation(fields: [billProviderSlug], references: [slug])
+  cableTVProvider  BillService  @relation(fields: [billServiceSlug], references: [slug])
+
+  @@unique([billServiceSlug, billProviderSlug])
+  @@map("BillProviderCableTVNetworks")
 }

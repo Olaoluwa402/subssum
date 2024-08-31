@@ -1,20 +1,20 @@
-const buyPower = [
+const shago = [
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "mtn-data",
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "glo-data",
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "airtel-data",
     },
     {
-        billProviderSlug: "buypower",
-        billServiceSlug: "etisalat-data",
+        billProviderSlug: "shago",
+        billServiceSlug: "9mobile-data",
     },
 ];
 
-export const billProviderDataBundleNetworks = [...buyPower];
+export const billProviderDataBundleNetworks = [...shago];

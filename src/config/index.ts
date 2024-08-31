@@ -5,9 +5,9 @@ import validate, {
     RequiredEnvironmentTypes,
 } from "@boxpositron/vre";
 
-import { IBuyPower } from "@/libs/buyPower";
 import { TSafehaven } from "@/libs/safehaven";
 import { ConfigOptions } from "cloudinary";
+import { IShago } from "@/libs/shago";
 
 export * from "./constants";
 
@@ -51,13 +51,14 @@ const runtimeEnvironment: RequiredEnvironment[] = [
         type: RequiredEnvironmentTypes.String,
     },
 
-    //buypower
+    //shago
+
     {
-        name: "BUYPOWER_BASE_URL",
+        name: "SHAGO_BASE_URL",
         type: RequiredEnvironmentTypes.String,
     },
     {
-        name: "BUYPOWER_TOKEN",
+        name: "SHAGO_KEY",
         type: RequiredEnvironmentTypes.String,
     },
 
@@ -159,10 +160,9 @@ export interface EMailConfig {
 //prod deployment env
 export const isProdEnvironment = process.env.ENVIRONMENT === "production";
 
-//buypower
-export const buyPowerOptions: IBuyPower.BuyPowerOptions = {
-    baseUrl: process.env.BUYPOWER_BASE_URL,
-    token: process.env.BUYPOWER_TOKEN,
+export const shagoOptions: IShago.ShagoOptions = {
+    baseUrl: process.env.SHAGO_BASE_URL,
+    hashKey: process.env.SHAGO_KEY,
 };
 
 //redis
