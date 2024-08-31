@@ -1,7 +1,7 @@
 import { PrismaService } from "@/modules/core/prisma/services";
 
 import { buildResponse, generateId } from "@/utils";
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import {
     PaymentChannel,
     PaymentStatus,
@@ -12,7 +12,7 @@ import {
     User,
 } from "@prisma/client";
 
-import { PurchaseAirtimeDto } from "../dtos/airtime";
+import { NetworkAirtimeProvider, PurchaseAirtimeDto } from "../dtos/airtime";
 import {
     CompleteAirtimePurchaseTransactionOptions,
     FormatAirtimeNetworkInput,
@@ -35,10 +35,16 @@ import {
 import { PaymentProvider, PaymentReferenceDto } from "../dtos";
 import { WalletNotFoundException } from "../../banking/wallet/errors";
 import { TransactionNotFoundException } from "../../transaction";
+import { Shago } from "@/libs/shago";
+import { VtuNetwork } from "@/libs/shago/interfaces/airtime";
 
 @Injectable()
 export class AirtimeBillService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        @Inject("SHAGO")
+        private readonly shago: Shago
+    ) {}
 
     async getAirtimeNetworks() {
         let networks = [];
@@ -212,6 +218,12 @@ export class AirtimeBillService {
                 billProviderId: billProvider.id,
                 paymentChannel: paymentChannel,
                 paymentReference: paymentReference,
+                vendType: "VTU",
+                serviceCode: "QAB",
+                network: purchaseOptions.billService.slice(
+                    0,
+                    purchaseOptions.billService.indexOf("-")
+                ),
                 paymentStatus: PaymentStatus.PENDING,
                 shortDescription: TransactionShortDescription.AIRTIME_PURCHASE,
                 senderIdentifier: purchaseOptions.vtuNumber,
@@ -339,6 +351,14 @@ export class AirtimeBillService {
             switch (options.billProvider.slug) {
                 case BillProviderSlug.SHAGO: {
                     //todo: complete payment
+                    // const resp = await this.shago.buyAirTime({
+                    //     serviceCode: options.transaction.,
+                    //     phone: options.transaction.senderIdentifier,
+                    //     amount: options.transaction.amount,
+                    //     vend_type: "VTU",
+                    //     network: options.billProvider.name,
+                    //     request_id: options.transaction.billPaymentReference,
+                    // });
                 }
             }
         } catch (error) {}

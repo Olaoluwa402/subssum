@@ -4,7 +4,7 @@ import { PurchaseBillDto } from ".";
 export enum NetworkAirtimeProvider {
     MTN = "mtn-airtime",
     AIRTEL = "airtel-airtime",
-    ETISALAT = "etisalat-airtime",
+    "9mobile" = "9mobile-airtime",
     GLO = "glo-airtime",
 }
 
