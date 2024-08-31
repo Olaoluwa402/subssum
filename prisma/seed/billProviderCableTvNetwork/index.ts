@@ -1,16 +1,16 @@
-const buyPower = [
+const shago = [
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "dstv",
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "gotv",
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "startimes",
     },
 ];
 
-export const billProviderCableTVNetworks = [...buyPower];
+export const billProviderCableTVNetworks = [...shago];

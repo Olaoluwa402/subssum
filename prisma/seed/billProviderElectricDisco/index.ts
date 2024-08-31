@@ -1,52 +1,58 @@
-const buyPower = [
+const shago = [
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
+        billServiceSlug: "ikeja-electric",
+        prepaidMeterCode: "IKEJA",
+        postpaidMeterCode: "IKEJA", //Ikeja
+    },
+    {
+        billProviderSlug: "shago",
         billServiceSlug: "abuja-electric",
         prepaidMeterCode: "ABUJA",
         postpaidMeterCode: "ABUJA", //Abuja
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "eko-electricity",
         prepaidMeterCode: "EKO",
         postpaidMeterCode: "EKO", //Eko
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "ibadan-electricity",
         prepaidMeterCode: "IBADAN",
         postpaidMeterCode: "IBADAN", //Ibadan
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "enugu-electric",
         prepaidMeterCode: "ENUGU",
         postpaidMeterCode: "ENUGU", //Abuja
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "port-harcourt-electric",
         prepaidMeterCode: "PH",
         postpaidMeterCode: "PH", //port harcourt
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "jos-electricity",
         prepaidMeterCode: "JOS",
         postpaidMeterCode: "JOS", //Jos
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "kaduna-electric",
         prepaidMeterCode: "KADUNA",
         postpaidMeterCode: "KADUNA", //Kaduna
     },
     {
-        billProviderSlug: "buypower",
+        billProviderSlug: "shago",
         billServiceSlug: "kano-electricity",
         prepaidMeterCode: "KANO",
         postpaidMeterCode: "KANO", //Jos
     },
 ];
 
-export const billProviderElectricDiscos = [...buyPower];
+export const billProviderElectricDiscos = [...shago];

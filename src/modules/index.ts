@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { APIModule } from "./api";
 import { CoreModule } from "./core";
 import { WebhookModule } from "./webhook";
-import { WorkflowModule } from "./workflow";
 import { ScheduleModule } from "@nestjs/schedule";
 import { BullBoardModule } from "@bull-board/nestjs";
 import { ExpressAdapter } from "@bull-board/express";
@@ -13,7 +12,6 @@ import { FactoryModule } from "./factory";
         APIModule,
         WebhookModule,
         CoreModule,
-        WorkflowModule,
         BullBoardModule.forRoot({
             route: "/queues",
             adapter: ExpressAdapter,

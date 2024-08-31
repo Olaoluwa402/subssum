@@ -1,18 +1,15 @@
 import { Prisma, PrismaClient, UserType } from "@prisma/client";
 const prisma = new PrismaClient();
 import logger from "moment-logger";
-import { banks } from "./bank";
 import { billProviders } from "./billProvider";
 import { billProviderAirtimeNetworks } from "./billProviderAirtimeNetwork";
 import { billProviderCableTVNetworks } from "./billProviderCableTvNetwork";
 import { billProviderDataBundleNetworks } from "./billProviderDataBundleNetwork";
 import { billProviderElectricDiscos } from "./billProviderElectricDisco";
-import { billProviderInternetNetworks } from "./billProviderInternetNetwork";
+
 import { billServiceData } from "./billService";
-import { lgas } from "./lga";
-import { states } from "./state";
+
 import { roles } from "./role";
-import { permissions } from "./permission";
 
 async function main() {
     // const createUserOptions: Prisma.UserUncheckedCreateInput = {
@@ -20,6 +17,7 @@ async function main() {
     //     phone: "09030000000",
     //     userType: UserType.ADMIN,
     //     identifier: "8jhPCbsdSKxKwfgi",
+    //     referralCode: "8jhPCbsdSKxKwfgi",
     //     password:
     //         "$2a$10$UfGbRgLwH5vwWKAxwwnfGulodPFd54k/hoagd82MLxVJh21ZEM6na",
     //     firstName: "subssum-admin",
@@ -100,70 +98,6 @@ async function main() {
     //         },
     //         update: {},
     //         create: payload,
-    //     });
-    // }
-    // //Internet
-    // for (let payload of billProviderInternetNetworks) {
-    //     await prisma.billProviderInternetNetwork.upsert({
-    //         where: {
-    //             billServiceSlug_billProviderSlug: {
-    //                 billProviderSlug: payload.billProviderSlug,
-    //                 billServiceSlug: payload.billServiceSlug,
-    //             },
-    //         },
-    //         update: {},
-    //         create: payload,
-    //     });
-    // }
-    // //states
-    // for (let state of states) {
-    //     await prisma.state.upsert({
-    //         where: { slug: state.slug },
-    //         update: {},
-    //         create: state,
-    //     });
-    // }
-    // //lgas
-    // for (let lga of lgas) {
-    //     await prisma.localGovernmentArea.upsert({
-    //         where: {
-    //             name_stateId: {
-    //                 name: lga.name,
-    //                 stateId: lga.stateId,
-    //             },
-    //         },
-    //         update: {},
-    //         create: lga,
-    //     });
-    // }
-    //banks
-    // for (let bank of banks) {
-    //     await prisma.bank.upsert({
-    //         where: { slug: bank.slug },
-    //         update: {},
-    //         create: bank,
-    //     });
-    // }
-    // const setting = await prisma.setting.upsert({
-    //     where: { id: 1 },
-    //     update: {},
-    //     create: {},
-    // });
-    // await prisma.walletToBankTransfer.create({
-    //     data: {
-    //         settingId: setting.id,
-    //         minValue: 0,
-    //         maxValue: 10000,
-    //         charge: 25,
-    //         currency: "NGN",
-    //     },
-    // });
-    // Permissions
-    // for (const permission of permissions) {
-    //     await prisma.permission.upsert({
-    //         where: { name: permission.name },
-    //         update: {},
-    //         create: permission,
     //     });
     // }
     // await prisma.userRole.create({
