@@ -19,3 +19,4 @@ import { WebExtension } from "./webExtension";
     ],
 })
 export class APIModule {}
+ 
