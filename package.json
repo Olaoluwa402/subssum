@@ -134,7 +134,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Olaoluwa402/nestjs-prisma-webpack-starter-template"
+        "url": "git+https://github.com/Olaoluwa402/subssum"
     },
     "keywords": [
         "node",
@@ -143,7 +143,7 @@
         "pnpm"
     ],
     "bugs": {
-        "url": "https://github.com/Olaoluwa402/nestjs-prisma-webpack-starter-template/issues"
+        "url": "https://github.com/Olaoluwa402/subssum/issues"
     },
-    "homepage": "https://github.comOlaoluwa402/nestjs-prisma-webpack-starter-template#readme"
+    "homepage": "https://github.comOlaoluwa402/subssum#readme"
 }
