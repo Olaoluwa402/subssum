@@ -54,11 +54,17 @@ export interface PurchaseInitializationHandlerOutput {
     totalAmount: number;
 }
 
+export interface PurchaseInitializationHandlerOutput {
+    paymentReference: string;
+    totalAmount: number;
+}
+
 export enum TransactionShortDescription {
     WALLET_FUNDED = "Wallet Funded",
     ELECTRICITY_PAYMENT = "Electricity Payment",
     DATA_PURCHASE = "Data Purchase",
     AIRTIME_PURCHASE = "Airtime Purchase",
+    AIRTIME_TO_CASH = "Airtime To cash",
     CABLE_TV_PAYMENT = "Cable TV Payment",
 }
 

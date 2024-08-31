@@ -9,6 +9,14 @@ export class AirtimePurchaseException extends HttpException {
     name = "AirtimePurchaseException";
 }
 
+export class DuplicateAirtimeToCashException extends HttpException {
+    name = "DuplicateAirtimeToCashException";
+}
+
+export class AirtimeToCashException extends HttpException {
+    name = "AirtimeToCashException";
+}
+
 export class UnavailableBillProviderAirtimeNetwork extends HttpException {
     name = "UnavailableBillProviderAirtimeNetwork";
 }

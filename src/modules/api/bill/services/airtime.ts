@@ -12,7 +12,11 @@ import {
     User,
 } from "@prisma/client";
 
-import { NetworkAirtimeProvider, PurchaseAirtimeDto } from "../dtos/airtime";
+import {
+    AirtimeToCashDto,
+    NetworkAirtimeProvider,
+    PurchaseAirtimeDto,
+} from "../dtos/airtime";
 import {
     CompleteAirtimePurchaseTransactionOptions,
     FormatAirtimeNetworkInput,
@@ -21,6 +25,7 @@ import {
 } from "../interfaces/airtime";
 import {
     AirtimePurchaseException,
+    AirtimeToCashException,
     DuplicateAirtimePurchaseException,
     InvalidBillTypePaymentReference,
 } from "../errors";
@@ -102,6 +107,69 @@ export class AirtimeBillService {
             }
         );
         return formatted;
+    }
+
+    async initializeAirtimeToCash(
+        airtimeToCashDto: AirtimeToCashDto,
+        user: User
+    ) {
+        const billProvider = await this.prisma.billProvider.findUnique({
+            where: {
+                slug: airtimeToCashDto.billProvider,
+            },
+        });
+
+        if (!billProvider) {
+            throw new AirtimeToCashException(
+                "Bill provider does not exist",
+                HttpStatus.NOT_FOUND
+            );
+        }
+
+        if (!billProvider.isActive) {
+            throw new AirtimeToCashException(
+                "Bill Provider not active",
+                HttpStatus.BAD_REQUEST
+            );
+        }
+
+        const providerNetwork =
+            await this.prisma.billProviderAirtimeNetwork.findUnique({
+                where: {
+                    billServiceSlug_billProviderSlug: {
+                        billProviderSlug: airtimeToCashDto.billProvider,
+                        billServiceSlug: airtimeToCashDto.billService,
+                    },
+                },
+            });
+
+        if (!providerNetwork) {
+            throw new AirtimeToCashException(
+                "The network provider is not associated with the bill provider",
+                HttpStatus.BAD_REQUEST
+            );
+        }
+
+        const amountToReceive = airtimeToCashDto.vtuAmount * 0.8;
+
+        const resp = await this.handleAirtimeToCashInitialization({
+            billProvider: billProvider,
+            paymentChannel: PaymentChannel.WALLET,
+            purchaseOptions: airtimeToCashDto,
+            user: user,
+        });
+
+        //todo: API to process Airtime to cash conversion
+
+        return buildResponse({
+            message: "Airtime to cash successfully initialized",
+            data: {
+                amountToConvert: airtimeToCashDto.vtuAmount,
+                amountToReceive: amountToReceive,
+                phone: airtimeToCashDto.vtuNumber,
+                reference: resp.paymentReference,
+            },
+        });
     }
 
     async initializeAirtimePurchase(
@@ -193,6 +261,55 @@ export class AirtimeBillService {
                 );
             }
         }
+    }
+
+    async handleAirtimeToCashInitialization(
+        options: BillPurchaseInitializationHandlerOptions<AirtimeToCashDto>
+    ): Promise<PurchaseInitializationHandlerOutput> {
+        const paymentReference = generateId({ type: "reference" });
+        const billPaymentReference = generateId({
+            type: "irecharge_ref",
+        });
+        const { billProvider, paymentChannel, purchaseOptions, user } = options;
+
+        //record transaction
+        const transactionCreateOptions: Prisma.TransactionUncheckedCreateInput =
+            {
+                amount: purchaseOptions.vtuAmount,
+                flow: TransactionFlow.IN,
+                status: TransactionStatus.PENDING,
+                totalAmount: purchaseOptions.vtuAmount * 0.8,
+                serviceCharge: purchaseOptions.vtuAmount * 0.2,
+                transactionId: generateId({ type: "transaction" }),
+                type: TransactionType.AIRTIME_TO_CASH,
+                airtimeSharePin: purchaseOptions.airtimeSharePin,
+                userId: user.id,
+                billPaymentReference: billPaymentReference,
+                billProviderId: billProvider.id,
+                paymentChannel: paymentChannel,
+                paymentReference: paymentReference,
+                network: purchaseOptions.billService.slice(
+                    0,
+                    purchaseOptions.billService.indexOf("-")
+                ),
+                paymentStatus: PaymentStatus.PENDING,
+                shortDescription: TransactionShortDescription.AIRTIME_TO_CASH,
+                senderIdentifier: purchaseOptions.vtuNumber,
+                billServiceSlug: purchaseOptions.billService,
+                provider: purchaseOptions.billProvider,
+            };
+
+        await this.prisma.transaction.create({
+            data: transactionCreateOptions,
+            select: {
+                id: true,
+            },
+        });
+
+        return {
+            paymentReference: paymentReference,
+            totalAmount: transactionCreateOptions.totalAmount,
+        };
     }
 
     async handleAirtimePurchaseInitialization(
