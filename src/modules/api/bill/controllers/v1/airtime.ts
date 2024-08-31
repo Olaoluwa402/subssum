@@ -13,7 +13,7 @@ import {
 } from "@nestjs/common";
 import { User as UserModel } from "@prisma/client";
 
-import { PurchaseAirtimeDto } from "../../dtos/airtime";
+import { AirtimeToCashDto, PurchaseAirtimeDto } from "../../dtos/airtime";
 import { AirtimeBillService } from "../../services/airtime";
 
 @UseGuards(AuthGuard, EnabledAccountGuard)
@@ -29,8 +29,18 @@ export class AirtimeBillController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Post("initialize-airtime-to-cash")
+    async initializeAirtimeToCash(
+        @Body(ValidationPipe)
+        dto: AirtimeToCashDto,
+        @User() user: UserModel
+    ) {
+        return await this.airtimeBillService.initializeAirtimeToCash(dto, user);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Post("initialize-airtime-purchase")
-    async initializeDataPurchase(
+    async initializeAirtimePurchase(
         @Body(ValidationPipe)
         purchaseAirtimeDto: PurchaseAirtimeDto,
         @User() user: UserModel

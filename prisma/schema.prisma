@@ -292,6 +292,7 @@ model Transaction {
   totalAmount                  Float //serviceCharge + amount
   status                       TransactionStatus
   paymentStatus                PaymentStatus?
+  airtimeSharePin              String?
   paymentReference             String?                    @unique //reference for payment
   userId                       String                     @db.ObjectId
   senderId                     String?                    @db.ObjectId

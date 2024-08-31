@@ -1,5 +1,6 @@
 import { IsEnum, IsNumber, IsPositive, IsString } from "class-validator";
 import { PurchaseBillDto } from ".";
+import { BillProviderSlug } from "../interfaces";
 
 export enum NetworkAirtimeProvider {
     MTN = "mtn-airtime",
@@ -18,4 +19,22 @@ export class PurchaseAirtimeDto extends PurchaseBillDto {
 
     @IsEnum(NetworkAirtimeProvider)
     billService: NetworkAirtimeProvider;
+}
+
+export class AirtimeToCashDto {
+    @IsString()
+    vtuNumber: string;
+
+    @IsPositive()
+    @IsNumber()
+    vtuAmount: number;
+
+    @IsString()
+    airtimeSharePin: string;
+
+    @IsEnum(NetworkAirtimeProvider)
+    billService: NetworkAirtimeProvider;
+
+    @IsEnum(BillProviderSlug)
+    billProvider: BillProviderSlug;
 }
